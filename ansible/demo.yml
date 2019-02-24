@@ -1,0 +1,24 @@
+---
+- hosts: all
+  become: yes
+  become_user: root
+  vars:
+    nameserver_ip: "192.168.100.11"
+    nameserver_local: "127.0.0.1"
+  tasks:
+  - name: Add lastline nameserver by variable when local
+    lineinfile:
+      path: /etc/resolv.conf
+      line: 'nameserver {{ nameserver_local }}'
+    when: ansible_connection == 'local'
+  
+  - name: Add lastline nameserver by variable when not local
+    lineinfile:
+      path: /etc/resolv.conf
+      line: 'nameserver {{ nameserver_ip }}'
+    when: ansible_connection != 'local'
+  
+  - name : Check Result
+    command: cat /etc/resolv.conf
+    register: myoutput
+  - debug: msg="the echo was {{ myoutput.stdout }}"

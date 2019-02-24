@@ -1,0 +1,41 @@
+---
+- hosts: ansible-mgn
+  become: yes
+  become_user: root
+
+  tasks:
+  - name: Install NTP Server
+    yum: name=ntp state=latest
+
+  - name: Edit Restrict NTP Client
+    lineinfile: path=/etc/ntp.conf regexp='^#restrict 192.168.1.0' line='restrict 192.168.100.0 mask 255.255.255.0 nomodify notrap' backup=yes
+  
+  - name: Edit Server0
+    lineinfile: path=/etc/ntp.conf regexp='^server 0.centos.pool.ntp.org iburst' line='server 2.th.pool.ntp.org iburst' backup=yes
+  
+  - name: Edit Server1
+    lineinfile: path=/etc/ntp.conf regexp='^server 1.centos.pool.ntp.org iburst' line='server 0.asia.pool.ntp.org iburst' backup=yes
+  
+  - name: Edit Server2
+    lineinfile: path=/etc/ntp.conf regexp='^server 2.centos.pool.ntp.org iburst' line='server 2.asia.pool.ntp.org iburst' backup=yes
+  
+  - name: Edit Server3
+    lineinfile: path=/etc/ntp.conf regexp='^server 3.centos.pool.ntp.org iburst' line='' backup=yes
+  
+  - name: Start the NTP server
+    service: name=ntpd state=started
+  
+  - name: Install firewall
+    yum: name=firewalld state=latest
+
+  - name: Start firewalld
+    service: name=firewalld state=started
+  
+  - name: Open firewall
+    firewalld: service=ntp permanent=yes state=enabled
+  
+  - name: Restart firewalld
+    service: name=firewalld state=restarted
+  
+  - name: Set Timezone to Asia/Bangkok
+    timezone: name=Asia/Bangkok

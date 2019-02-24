@@ -1,0 +1,17 @@
+---
+- hosts: server-04
+  become: yes
+  become_user: root
+  vars:
+    packages:
+      - httpd
+      - mariadb-server
+      - php
+  tasks:
+  - name: Install Package
+    yum: 
+      name: "{{ item }}" 
+      state: latest
+    with_items: "{{ packages }}"
+
+  
