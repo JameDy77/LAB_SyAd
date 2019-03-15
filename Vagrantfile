@@ -6,7 +6,7 @@ Vagrant.configure("2") do |config|
   config.vm.box_url = "https://staff.informatics.buu.ac.th/~aekapop/package.box"
 
   config.vm.provider "virtualbox" do |vb|
-    vb.memory = 512
+    vb.memory = 2048
     vb.cpus = 1
   end
 

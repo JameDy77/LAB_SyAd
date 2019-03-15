@@ -1,0 +1,133 @@
+---
+- hosts: web
+  become: yes
+  become_user: root
+
+  tasks:
+  - name: Install remi repo.
+    yum: 
+      name: http://rpms.remirepo.net/enterprise/remi-release-7.rpm 
+      state: latest
+
+  - name: Import remi GPG key.
+    rpm_key:
+      key: http://rpms.remirepo.net/RPM-GPG-KEY-remi
+      state: present
+
+  - name: Install yum-utils.
+    yum:
+      name: yum-utils
+      state: latest
+    
+  - name: Enable remi-php73
+    command: yum-config-manager --enable remi-php73
+
+  - name: Install httpd and php 7.3 and php module
+    yum:
+      name:
+        - httpd
+        - php 
+        - php-cli 
+        - php-fpm
+        - php-mysqlnd
+        - php-zip
+        - php-devel
+        - php-gd
+        - php-mcrypt
+        - php-mbstring
+        - php-curl
+        - php-xml
+        - php-pear
+        - php-bcmath
+        - php-json
+      state: latest
+    
+  - name: Edit timezone in php.ini
+    lineinfile:
+      path: /etc/php.ini
+      regexp: ';date.timezone'
+      line: 'date.timezone = Asia/Bangkok'
+      backup: yes
+
+  - name: Enable service httpd, and not touch the state
+    service:
+      name: httpd
+      enabled: yes
+  
+  - name: Start httpd Service
+    service:
+      name: httpd
+      state: started
+
+  - name: Enable service Firewall, and not touch the state
+    service:
+      name: firewalld
+      enabled: yes
+
+  - name: Start firewalld Service
+    service:
+      name: firewalld
+      state: started
+
+  - name: Open firewall service http and https
+    firewalld:
+      service: '{{ item }}'
+      permanent: yes
+      state: enabled
+    loop:
+      - "http"
+      - "https"
+
+  - name: Restart firewalld service
+    service:
+      name: firewalld
+      state: restarted
+
+  - name: Copy index.php to web server
+    template:
+      src: 'template/index.php.j2'
+      dest: '/var/www/html/index.php'
+      owner: root
+      group: root
+      mode: "0755"
+
+- hosts: db
+  become: yes
+  become_user: root
+
+  tasks:
+  - name: Install mariadb-Server
+    yum: 
+      name: mariadb-server 
+      state: latest
+  
+  - name: Enable service MariaDB-Server, and not touch the state
+    service:
+      name: mariadb
+      enabled: yes
+
+  - name: Start service httpd, if not started
+    service:
+      name: mariadb
+      state: started
+
+  - name: Enable service Firewall, and not touch the state
+    service:
+      name: firewalld
+      enabled: yes
+
+  - name: Start service httpd, if not started
+    service:
+      name: firewalld
+      state: started
+
+  - name: Open firewall 3306 tcp
+    firewalld:
+      port: "3306/tcp"
+      permanent: yes
+      state: enabled
+
+  - name: Restart firewalld service
+    service:
+      name: firewalld
+      state: restarted
