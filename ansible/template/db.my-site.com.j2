@@ -11,8 +11,11 @@ $TTL    604800
 ; name servers - A records
 ns1.my-site.com.      IN  	A   192.168.100.11
 
-11              IN      PTR     ansible-mgn.my-site.com.
-80              IN      PTR     server-01.my-site.com.
-81              IN      PTR     server-02.my-site.com.
-82              IN      PTR     server-03.my-site.com.
-70              IN      PTR     server-04.my-site.com.
+ansible-mgn     IN      A     192.168.100.11
+server-01       IN      A     192.168.100.80
+server-02       IN      A     192.168.100.81
+server-03       IN      A     192.168.100.82
+server-04       IN      A     192.168.100.70
+www             IN      CNAME server-01
+WEB-01          IN      CNAME server-02
+WEB-02          IN      CNAME server-03
